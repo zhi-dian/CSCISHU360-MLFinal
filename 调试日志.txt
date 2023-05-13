@@ -1,0 +1,119 @@
+id_mask_count = (
+    train.loc[train["EncodedPixels"].isnull() == False, "Image_Label"]
+    .apply(lambda x: x.split("_")[0])
+    .value_counts()
+    .sort_index()
+    .reset_index()
+    .rename(columns={"Image_Label": "img_id", "count": "count"})
+)
+
+
+
+def init_path():
+    # init log path
+    global _log_path
+    _log_path = 'output.log'
+
+def log(obj, print_flag=True):
+    if print_flag:
+        print(obj)
+    try:
+        with open(_log_path, 'a') as f:
+            print(obj, file=f)
+    except:
+        pass
+
+init_path()
+
+
+调试日志
+
+1.imread无法读取mask
+
+后缀名不可修改
+
+
+2.im_id 错误
+hpcpandas版本不一，手动调错
+
+454
+id_mask_count = (
+    train.loc[train["EncodedPixels"].isnull() == False, "Image_Label"]
+    .apply(lambda x: x.split("_")[0])
+    .value_counts()
+    .sort_index()
+    .reset_index()
+    .rename(columns={"Image_Label": "img_id", "count": "count"})
+)
+
+3.tqdm
+pip install ipywidgets
+
+
+添加savepath
+
+4. ax无法正常显示，ori_mask不明显
+
+----》 hpc
+
+
+
+visual时*225
+
+
+5. import torchvision.models
+
+   33160374   rtx8000 image_se   jx2314  R       7:08      1 gr033
+   33160450 rtx8000,v PSPnet.p   jx2314 PD       0:00      1 (Priority)
+
+
+
+
+33173680 rtx8000,v  Unet.py   jx2314 PD       0:00      1 (None)
+
+scontrol show jobid -dd 33173680
+
+
+6. grad位置错误，调整至backprop之前
+
+7.print无输出
+改用log
+
+8.np.bool 报错，addcmul_报错
+改为bool
+grad,grad前移
+
+9*。
+imread（）返回浮点数
+00b81e1Gravel.jpg
+sbbb!!!  make_mask()内移除/255
+
+10.
+尝试bs = 10
+
+11. 
+count >= tr-1
+
+12.
+test时候因为postprocess所以需要考虑batchsize的问题
+
+问题：这个算dice是四个class一起算吗？
+
+问题：设备的传输问题cpu gpu
+
+问题： 如果正确pred的sum是0，dicescore是什么
+
+问题: validate,train,test的dice的score不统一
+代码简化：
+修改path
+删除visualize
+删除get-preprocessing
+删除plot_with_augmentation
+删除
+
+test修改
+/len(.dataset)改为/len(.sampler)
+上下都加eps
+
+validate,test加上torchnograd
+

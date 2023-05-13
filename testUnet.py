@@ -27,8 +27,7 @@ import matplotlib.pyplot as plt
 from tqdm.notebook import tqdm as tq
 from sklearn.model_selection import StratifiedKFold
 from sklearn.metrics import roc_auc_score
-import torchvision
-from torchvision import models
+
 
 import torch
 import torchvision
@@ -41,7 +40,9 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data import TensorDataset, DataLoader, Dataset
 from torch.optim.lr_scheduler import StepLR, ReduceLROnPlateau
 
+# ablumentations for easy image augmentation for input as well as output
 import albumentations as albu
+# from albumentations import torch as AT
 plt.style.use('bmh')
 
 # seeding function for reproducibility
@@ -73,6 +74,7 @@ class CloudDataset(Dataset):
         self.data_folder = f"{img_paths}"
         self.img_ids = img_ids
         self.transforms = transforms
+        # self.masks = make_mask_all(self.df)
 
     def __getitem__(self, idx):
         image_name = self.img_ids[idx]
@@ -226,7 +228,7 @@ def visualize_with_raw(
             f"Predicted mask with processing {class_dict[i]}", fontsize=fontsize
         )
     plt.savefig(save_path+"picture"+str(iter)+".png")
-    
+
 
 # sigmoid = lambda x: 1 / (1 + np.exp(-x))
 def sigmoid(x):
@@ -279,6 +281,7 @@ def get_validation_augmentation():
     return albu.Compose(test_transform)
 
 
+
 def dice(img1, img2):
     img1 = np.asarray(img1).astype(bool)
     img2 = np.asarray(img2).astype(bool)
@@ -304,11 +307,11 @@ def dice_no_threshold(
 
     intersection = torch.sum(targets * outputs)
     union = torch.sum(targets) + torch.sum(outputs)
-    dice = 2 * intersection / (union + eps)
+    dice = (2 * intersection+eps) / (union + eps)
 
     return dice
 
-save_path = "datasaved/PSPnet/"
+save_path = "datasaved/Unet/"
 path = "understanding_cloud_organization/"
 img_paths = "understanding_cloud_organization/train_image/"
 train_on_gpu = torch.cuda.is_available()
@@ -329,7 +332,7 @@ train["im_id"] = train["Image_Label"].apply(lambda x: x.split("_")[0])
 
 def make_img(df: pd.DataFrame,  shape: tuple = (350, 525)):
     """
-    Create mask based on df, image name and shape.
+    create 350,525 img for later dataloader
     """
     # print(df.head())
     masks = np.zeros((shape[0], shape[1], 4), dtype=np.float32)
@@ -361,8 +364,8 @@ id_mask_count = (
 )
 print(id_mask_count.info())
 print(id_mask_count.head())
-test_id_mask_count = id_mask_count[int(2*len(id_mask_count) / 5):]
-id_mask_count = id_mask_count[:int(2*len(id_mask_count) / 5)]
+test_id_mask_count = id_mask_count[:int(len(id_mask_count) / 5)]
+id_mask_count = id_mask_count[int(len(id_mask_count) / 5):]
 
 ids = id_mask_count["img_id"].values
 li = [
@@ -411,126 +414,123 @@ test_loader = DataLoader(test_dataset, batch_size=bs,
 
 
 #modify
-sample_size = 100
-indices = random.sample(range(len(train_dataset)), sample_size)
-sampler = SubsetRandomSampler(indices)
-train_loader = DataLoader(train_dataset, batch_size=bs, sampler=sampler, num_workers=num_workers)
+# sample_size = 25
+# indices = random.sample(range(len(train_dataset)), sample_size)
+# sampler = SubsetRandomSampler(indices)
+# train_loader = DataLoader(train_dataset, batch_size=bs, sampler=sampler, num_workers=num_workers)
 
-indices = random.sample(range(len(valid_dataset)), sample_size)
-sampler = SubsetRandomSampler(indices)
-valid_loader = DataLoader(valid_dataset, batch_size=bs, sampler=sampler, num_workers=num_workers)
-
-
-indices = random.sample(range(len(test_dataset)), sample_size)
-sampler = SubsetRandomSampler(indices)
-test_loader = DataLoader(test_dataset, batch_size=bs, sampler=sampler, num_workers=num_workers)
+# indices = random.sample(range(len(valid_dataset)), sample_size)
+# sampler = SubsetRandomSampler(indices)
+# valid_loader = DataLoader(valid_dataset, batch_size=bs, sampler=sampler, num_workers=num_workers)
 
 
+# indices = random.sample(range(len(test_dataset)), sample_size)
+# sampler = SubsetRandomSampler(indices)
+# test_loader = DataLoader(test_dataset, batch_size=bs, sampler=sampler, num_workers=num_workers)
 
 """## Model Definition"""
-class PPM(nn.Module):
-    def __init__(self, in_dim, reduction_dim, bins):
-        super(PPM, self).__init__()
-        self.features = []
-        for bin in bins:
-            self.features.append(nn.Sequential(
-                nn.AdaptiveAvgPool2d(bin),
-                nn.Conv2d(in_dim, reduction_dim, kernel_size=1, bias=False),
-                nn.BatchNorm2d(reduction_dim),
-                nn.ReLU(inplace=True)
-            ))
-        self.features = nn.ModuleList(self.features)
+
+class double_conv(nn.Module):
+    """(conv => BN => ReLU) * 2"""
+
+    def __init__(self, in_ch, out_ch):
+        super(double_conv, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_ch, out_ch, 3, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(out_ch, out_ch, 3, padding=1),
+            nn.BatchNorm2d(out_ch),
+            nn.ReLU(inplace=True),
+        )
 
     def forward(self, x):
-        x_size = x.size()
-        out = [x]
-        for f in self.features:
-            out.append(F.interpolate(f(x), x_size[2:], mode='bilinear', align_corners=True))
-        return torch.cat(out, 1)
+        x = self.conv(x)
+        return x
 
 
-class PSPNet(nn.Module):
-    def __init__(self, layers=50, bins=(1, 2, 3, 6), dropout=0.1, classes=2, zoom_factor=8, use_ppm=True, criterion=nn.CrossEntropyLoss(ignore_index=255), pretrained=True):
-        super(PSPNet, self).__init__()
-        assert layers in [50, 101, 152]
-        assert 2048 % len(bins) == 0
-        assert classes > 1
-        assert zoom_factor in [1, 2, 4, 8]
-        self.zoom_factor = zoom_factor
-        self.use_ppm = use_ppm
-        self.criterion = criterion
+class inconv(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(inconv, self).__init__()
+        self.conv = double_conv(in_ch, out_ch)
 
-        if layers == 50:
-            resnet = models.resnet50(pretrained=pretrained)
-        elif layers == 101:
-            resnet = models.resnet101(pretrained=pretrained)
+    def forward(self, x):
+        x = self.conv(x)
+        return x
+
+
+class down(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(down, self).__init__()
+        self.mpconv = nn.Sequential(nn.MaxPool2d(2), double_conv(in_ch, out_ch))
+
+    def forward(self, x):
+        x = self.mpconv(x)
+        return x
+
+
+class up(nn.Module):
+    def __init__(self, in_ch, out_ch, bilinear=True):
+        super(up, self).__init__()
+
+        if bilinear:
+            self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
         else:
-            resnet = models.resnet152(pretrained=pretrained)
+            self.up = nn.ConvTranspose2d(in_ch // 2, in_ch // 2, 2, stride=2)
 
-        self.layer0 = nn.Sequential(resnet.conv1, resnet.bn1, resnet.relu, resnet.maxpool)
-        self.layer1, self.layer2, self.layer3, self.layer4 = resnet.layer1, resnet.layer2, resnet.layer3, resnet.layer4
+        self.conv = double_conv(in_ch, out_ch)
 
-        for n, m in self.layer3.named_modules():
-            if 'conv2' in n:
-                m.dilation, m.padding, m.stride = (2, 2), (2, 2), (1, 1)
-            elif 'downsample.0' in n:
-                m.stride = (1, 1)
-        for n, m in self.layer4.named_modules():
-            if 'conv2' in n:
-                m.dilation, m.padding, m.stride = (4, 4), (4, 4), (1, 1)
-            elif 'downsample.0' in n:
-                m.stride = (1, 1)
+    def forward(self, x1, x2):
+        x1 = self.up(x1)
 
-        fea_dim = 2048
-        if use_ppm:
-            self.ppm = PPM(fea_dim, int(fea_dim/len(bins)), bins)
-            fea_dim *= 2
-        self.cls = nn.Sequential(
-            nn.Conv2d(fea_dim, 512, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(512),
-            nn.ReLU(inplace=True),
-            nn.Dropout2d(p=dropout),
-            nn.Conv2d(512, classes, kernel_size=1)
-        )
-        # if self.training:
-        #     self.aux = nn.Sequential(
-        #         nn.Conv2d(1024, 256, kernel_size=3, padding=1, bias=False),
-        #         nn.BatchNorm2d(256),
-        #         nn.ReLU(inplace=True),
-        #         nn.Dropout2d(p=dropout),
-        #         nn.Conv2d(256, classes, kernel_size=1)
-        #     )
+        # input is CHW
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
 
-    def forward(self, x, y=None):
-        x_size = x.size()
-        # assert (x_size[2]-1) % 8 == 0 and (x_size[3]-1) % 8 == 0
-        h = int((x_size[2] - 1) / 8 * self.zoom_factor + 1)
-        w = int((x_size[3] - 1) / 8 * self.zoom_factor + 1)
+        x1 = F.pad(x1, (diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2))
+        
+        x = torch.cat([x2, x1], dim=1)
+        return self.conv(x)
 
-        x = self.layer0(x)
-        x = self.layer1(x)
-        x = self.layer2(x)
-        x_tmp = self.layer3(x)
-        x = self.layer4(x_tmp)
-        if self.use_ppm:
-            x = self.ppm(x)
-        x = self.cls(x)
-        if self.zoom_factor != 1:
-            x = F.interpolate(x, size=(h, w), mode='bilinear', align_corners=True)
 
-        # if self.training:
-        #     aux = self.aux(x_tmp)
-        #     if self.zoom_factor != 1:
-        #         aux = F.interpolate(aux, size=(h, w), mode='bilinear', align_corners=True)
-        #     main_loss = self.criterion(x, y)
-        #     aux_loss = self.criterion(aux, y)
-        #     return x.max(1)[1], main_loss, aux_loss
-        # else:
-              # return x
+class outconv(nn.Module):
+    def __init__(self, in_ch, out_ch):
+        super(outconv, self).__init__()
+        self.conv = nn.Conv2d(in_ch, out_ch, 1)
+
+    def forward(self, x):
+        x = self.conv(x)
+        return x
+
+
+class UNet(nn.Module):
+    def __init__(self, n_channels, n_classes):
+        super(UNet, self).__init__()
+        self.inc = inconv(n_channels, 64)
+        self.down1 = down(64, 128)
+        self.down2 = down(128, 256)
+        self.down3 = down(256, 512)
+        self.down4 = down(512, 512)
+        self.up1 = up(1024, 256, False)
+        self.up2 = up(512, 128, False)
+        self.up3 = up(256, 64, False)
+        self.up4 = up(128, 64, False)
+        self.outc = outconv(64, n_classes)
+
+    def forward(self, x):
+        x1 = self.inc(x)
+        x2 = self.down1(x1)
+        x3 = self.down2(x2)
+        x4 = self.down3(x3)
+        x5 = self.down4(x4)
+        x = self.up1(x5, x4)
+        x = self.up2(x, x3)
+        x = self.up3(x, x2)
+        x = self.up4(x, x1)
+        x = self.outc(x)
         return torch.sigmoid(x)
 
-
-model = PSPNet(layers=50, bins=(1, 2, 3, 6), dropout=0.1, classes=4, zoom_factor=8, use_ppm=True, pretrained=False)
+model = UNet(n_channels=3, n_classes=4).float()
 if train_on_gpu:
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
@@ -706,89 +706,10 @@ scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.2, pa
 """## Training loop"""
 
 # number of epochs to train the model
-n_epochs = 8
-train_loss_list = []
-valid_loss_list = []
-dice_score_list = []
-lr_rate_list = []
-valid_loss_min = np.Inf # track change in validation loss
-for epoch in range(1, n_epochs+1):
-
-    # keep track of training and validation loss
-    train_loss = 0.0
-    valid_loss = 0.0
-    dice_score = 0.0
-    print("Training Start")
-    model.train()
-    bar = tq(train_loader, postfix={"train_loss":0.0})
-    for data, target in bar:
-        # move tensors to GPU if CUDA is available
-        # print(data.size(),target.size())
-        if train_on_gpu:
-            data, target = data.to(device), target.to(device)
-        # forward pass: compute predicted outputs by passing inputs to the model
-        output = model(data)
-        # print(target.sum())
-        # calculate the batch loss
-        loss = criterion(output, target)
-        #print(loss)
-        # clear the gradients of all optimized variables
-        optimizer.zero_grad()
-        # backward pass: compute gradient of the loss with respect to model parameters
-        loss.backward()
-        # perform a single optimization step (parameter update)
-        optimizer.step()
-        # update training loss
-        train_loss += loss.item()*data.size(0)
-        bar.set_postfix(ordered_dict={"train_loss":loss.item()})
-        # print(f"train epoch {epoch}: loss : {loss}")
-    ######################    
-    # validate the model #
-    ######################
-    model.eval()
-    del data, target
-    with torch.no_grad():
-        bar = tq(valid_loader, postfix={"valid_loss":0.0, "dice_score":0.0})
-        for data, target in bar:
-            # move tensors to GPU if CUDA is available
-            if train_on_gpu:
-                data, target = data.cuda(), target.cuda()
-            # forward pass: compute predicted outputs by passing inputs to the model
-            output = model(data)
-            # calculate the batch loss
-            loss = criterion(output, target)
-            # update average validation loss 
-            valid_loss += loss.item()*data.size(0)
-            dice_cof = dice_no_threshold(output.to(device), target.to(device)).item()
-            dice_score +=  dice_cof * data.size(0)
-            bar.set_postfix(ordered_dict={"valid_loss":loss.item(), "dice_score":dice_cof})  
-    # calculate average losses
-    train_loss = train_loss/len(train_loader.dataset)
-    valid_loss = valid_loss/len(valid_loader.dataset)
-    dice_score = dice_score/len(valid_loader.dataset)
-    print(f"train loss: {train_loss}, valid loss: {valid_loss}, dice score: {dice_score}")
-    
-    train_loss_list.append(train_loss)
-    valid_loss_list.append(valid_loss)
-    dice_score_list.append(dice_score)
-    lr_rate_list.append([param_group['lr'] for param_group in optimizer.param_groups])
-    
-    # print training/validation statistics 
-
-    
-    # save model if validation loss has decreased
-    if valid_loss <= valid_loss_min:
-        print('Validation loss decreased ({:.6f} --> {:.6f}).  Saving model ...'.format(
-        valid_loss_min,
-        valid_loss))
-        torch.save(model.state_dict(), 'model_cifar1.pt')
-        valid_loss_min = valid_loss
-    
-    scheduler.step(valid_loss)
 
 """## Ploting Metrics"""
 
-new_model = PSPNet(layers=50, bins=(1, 2, 3, 6), dropout=0.1, classes=4, zoom_factor=8, use_ppm=True, pretrained=False)
+new_model = UNet(n_channels=3, n_classes=4).float()
 # Get the current working directory
 cwd = os.getcwd()
 
@@ -797,131 +718,12 @@ contents = os.listdir(cwd)
 
 # Search for the model file
 for file in contents:
-    if file == 'model_cifar1.pt':
+    if file == 'model_cifar.pt':
         print(f"Found model file at: {os.path.join(cwd, file)}")
 
 
-plt.figure(figsize=(10,10))
-plt.plot([i[0] for i in lr_rate_list])
-plt.ylabel('learing rate during training', fontsize=22)
-plt.savefig(save_path+"learning rate.png")
-plt.show()
-
-plt.figure(figsize=(10,10))
-plt.plot(train_loss_list,  marker='o', label="Training Loss")
-plt.plot(valid_loss_list,  marker='o', label="Validation Loss")
-plt.ylabel('loss', fontsize=22)
-plt.legend()
-plt.savefig(save_path+"loss.png")
-plt.show()
-
-plt.figure(figsize=(10,10))
-plt.plot(dice_score_list)
-plt.ylabel('Dice score')
-plt.savefig(save_path+"Dice Score.png")
-plt.show()
-
 # load best model
-model.load_state_dict(torch.load('model_cifar1.pt'))
-model.eval()
-
-valid_masks = []
-count = 0
-tr = min(len(valid_ids)*4, 2000)
-probabilities = np.zeros((tr, 350, 525), dtype = np.float32)
-for data, target in tq(valid_loader):
-    if train_on_gpu:
-        data = data.cuda()
-    target = target.cpu().detach().numpy()
-    outpu = model(data).cpu().detach().numpy()
-    for p in range(data.shape[0]):
-        output, mask = outpu[p], target[p]
-        for m in mask:
-            valid_masks.append(resize_it(m))
-        for probability in output:
-            probabilities[count, :, :] = resize_it(probability)
-            count += 1
-        if count > tr - 1:
-            break
-    if count > tr - 1:
-        break
-
-"""## Grid Search for best Threshold"""
-
-class_params = {}
-with torch.no_grad():
-    for class_id in range(4):
-        print(class_id)
-        attempts = []
-        for t in range(0, 100, 5):
-            t /= 100
-            # for ms in [0, 100, 1200, 5000, 10000, 30000]:
-            for ms in [0, 100, 1200, 5000]:
-                masks, d = [], []
-                for i in range(class_id, len(probabilities), 4):
-                    probability = probabilities[i]
-                    predict, num_predict = post_process(probability, t, ms)
-                    masks.append(predict)
-                for i, j in zip(masks, valid_masks[class_id::4]):
-                    if (i.sum() == 0) & (j.sum() == 0):
-                        d.append(1)
-                    else:
-                        d.append(dice(i, j))
-                attempts.append((t, ms, np.mean(d)))
-
-        attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
-        attempts_df = attempts_df.sort_values('dice', ascending=False)
-        print(attempts_df.head())
-        best_threshold = attempts_df['threshold'].values[0]
-        best_size = attempts_df['size'].values[0]
-        class_params[class_id] = (best_threshold, best_size)
-
-del masks
-del valid_masks
-del probabilities
-gc.collect()
-
-attempts_df = pd.DataFrame(attempts, columns=['threshold', 'size', 'dice'])
-print(class_params)
-# print(class_params.shape)
-
-attempts_df.groupby(['threshold'])['dice'].max()
-
-attempts_df.groupby(['size'])['dice'].max()
-
-attempts_df = attempts_df.sort_values('dice', ascending=False)
-attempts_df.head(10)
-
-sns.lineplot(x='threshold', y='dice', hue='size', data=attempts_df)
-plt.title('Threshold and min size vs dice')
-plt.savefig(save_path+"threshold.jpg")
-best_threshold = attempts_df['threshold'].values[0]
-best_size = attempts_df['size'].values[0]
-
-
-# class_params = {0:(0.3,1200),1:(0.3,1200),2:(0.3,1200),3:(0.3,1200)}
-print("visualize starting...")
-with torch.no_grad():
-    for i, (data, target) in enumerate(valid_loader):
-        if train_on_gpu:
-            data = data.cuda()
-        output = ((model(data))[0]).cpu().detach().numpy()
-        image  = data[0].cpu().detach().numpy()
-        mask   = target[0].cpu().detach().numpy()
-        output = output.transpose(1 ,2, 0)
-        image_vis = image.transpose(1, 2, 0)
-        mask = mask.astype('uint8').transpose(1, 2, 0)
-        pr_mask = np.zeros((350, 525, 4))
-        for j in range(4):
-            probability = resize_it(output[:, :, j])
-            pr_mask[:, :, j], _ = post_process(probability,
-                                            class_params[j][0],
-                                            class_params[j][1])
-        visualize_with_raw(image=image_vis, mask=pr_mask,
-                        original_image=image_vis, original_mask=mask,
-                        raw_image=image_vis, raw_mask=output,iter = i)
-        if i >= 6:
-            break
+model.load_state_dict(torch.load('model_cifar.pt'))
 
 # torch.cuda.empty_cache()
 # gc.collect()
@@ -937,6 +739,8 @@ print("testing start...")
 pred = np.zeros((bs,4,350,525))
 masks = np.zeros((bs,4,350,525))
 
+
+class_params = {0: (0.5, 30000), 1: (0.4, 30000), 2: (0.25, 30000), 3: (0.7, 10000)}
 with torch.no_grad():
     for data, targ in tq(test_loader):
         # print(data.shape,targ.shape)
@@ -967,7 +771,6 @@ with torch.no_grad():
         dice_cof = dice(pred, masks).item()
         # print(dice_cof)
         dice_score +=  dice_cof*data.size(0)
-        bar.set_postfix(ordered_dict={"valid_loss":loss.item(), "dice_score":dice_cof})  
             # calculate average losses
 test_loss = test_loss/len(test_loader.sampler)
 dice_score = dice_score/len(test_loader.sampler)
