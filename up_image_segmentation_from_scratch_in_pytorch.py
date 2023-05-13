@@ -7,6 +7,7 @@
 3. https://github.com/qubvel/segmentation_models.pytorch/blob/master/segmentation_models_pytorch/utils/losses.py
 4. https://github.com/milesial/Pytorch-UNet
 5. https://www.kaggle.com/ratthachat/cloud-convexhull-polygon-postprocessing-no-gpu
+6. https://colab.research.google.com/drive/1qwEO3h_3I5jbyOwEgfvQHCITLVWM5fhF
 
 # Imports
 """
