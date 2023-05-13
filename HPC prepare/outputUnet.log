@@ -1,0 +1,302 @@
+Training 1 Start
+['sample_submission.csv', 'train.csv', 'train_image', 'train_images_525']
+1
+True
+          Image_Label  ...        im_id
+0    0011165.jpg_Fish  ...  0011165.jpg
+1  0011165.jpg_Flower  ...  0011165.jpg
+2  0011165.jpg_Gravel  ...  0011165.jpg
+3   0011165.jpg_Sugar  ...  0011165.jpg
+4    002be4f.jpg_Fish  ...  002be4f.jpg
+
+[5 rows x 4 columns]
+None
+        img_id  count
+0  0011165.jpg      2
+1  002be4f.jpg      3
+2  0031ae9.jpg      3
+3  0035239.jpg      2
+4  003994e.jpg      3
+training set   ['0011165.jpg' '002be4f.jpg' '0031ae9.jpg' '0035239.jpg' '003994e.jpg'].. with length 1996
+validation set ['006bf7c.jpg' '0091591.jpg' '00b81e1.jpg' '00dec6a.jpg' '0104b5b.jpg'].. with length 222
+testing set    ['652454c.jpg' '653008c.jpg' '6550e47.jpg' '6559163.jpg' '6566b6a.jpg'].. with length 3328
+Training 1 Start
+train loss: 1.1395727532182285, valid loss: 1.2315637936463226, dice score: 0.32107353666881183
+Validation loss decreased (inf --> 1.231564).  Saving model ...
+Training 2 Start
+train loss: 0.9756062401081612, valid loss: 1.0328434437244862, dice score: 0.4045140713721782
+Validation loss decreased (1.231564 --> 1.032843).  Saving model ...
+Training 3 Start
+train loss: 0.9538312548387027, valid loss: 1.2852278324934814, dice score: 0.32968740903579435
+Training 4 Start
+train loss: 0.9442265734882775, valid loss: 1.376543077262672, dice score: 0.3876761235632338
+Training 5 Start
+train loss: 0.9472178832323613, valid loss: 0.9748101878810573, dice score: 0.4146798841051153
+Validation loss decreased (1.032843 --> 0.974810).  Saving model ...
+Training 6 Start
+train loss: 0.9264138840243429, valid loss: 0.979152911418193, dice score: 0.42544851619918067
+Training 7 Start
+train loss: 0.9168886615183645, valid loss: 1.1277748142276798, dice score: 0.3487978032580367
+Training 8 Start
+train loss: 0.9086029230951068, valid loss: 1.0300276676813762, dice score: 0.40253095449628057
+Training 9 Start
+train loss: 0.8847902382542948, valid loss: 0.9166716331834192, dice score: 0.4449073218547546
+Validation loss decreased (0.974810 --> 0.916672).  Saving model ...
+Training 10 Start
+train loss: 0.8716733686192958, valid loss: 0.9093772328651704, dice score: 0.45949895344338976
+Validation loss decreased (0.916672 --> 0.909377).  Saving model ...
+Training 11 Start
+train loss: 0.8700712795009116, valid loss: 0.9225450152749414, dice score: 0.4549038643772538
+Training 12 Start
+train loss: 0.8571922068366545, valid loss: 0.9107196245107565, dice score: 0.4586372797016625
+Training 13 Start
+train loss: 0.8499294503896174, valid loss: 0.8943715551951984, dice score: 0.47367817754144065
+Validation loss decreased (0.909377 --> 0.894372).  Saving model ...
+Training 14 Start
+train loss: 0.8490877241075397, valid loss: 0.9040984769125242, dice score: 0.46663660455394435
+Training 15 Start
+train loss: 0.8446104288817885, valid loss: 0.8930095971167624, dice score: 0.4746376579409247
+Validation loss decreased (0.894372 --> 0.893010).  Saving model ...
+Training 16 Start
+train loss: 0.8469346430832017, valid loss: 0.9043174552487897, dice score: 0.4672945329734871
+Training 17 Start
+train loss: 0.8385900613779057, valid loss: 0.9329475443642419, dice score: 0.46165905959971315
+Training 18 Start
+train loss: 0.8392729785494909, valid loss: 0.8965800678407824, dice score: 0.4665513683009792
+Training 19 Start
+train loss: 0.8214244164063601, valid loss: 0.8577848887658334, dice score: 0.4930280320816212
+Validation loss decreased (0.893010 --> 0.857785).  Saving model ...
+Training 20 Start
+train loss: 0.8235833792982694, valid loss: 0.8620720167417784, dice score: 0.49043704475368466
+Training 21 Start
+train loss: 0.8171867766456757, valid loss: 0.8589763662836574, dice score: 0.4852894402302063
+Training 22 Start
+train loss: 0.8127409556585705, valid loss: 0.8523208246574746, dice score: 0.48966508137213216
+Validation loss decreased (0.857785 --> 0.852321).  Saving model ...
+Training 23 Start
+train loss: 0.8122751205144282, valid loss: 0.8619062159512494, dice score: 0.48031993707021076
+Training 24 Start
+train loss: 0.8162427705848863, valid loss: 0.8553869794080923, dice score: 0.4965873067980414
+Training 25 Start
+train loss: 0.8145299136996986, valid loss: 0.861592407162125, dice score: 0.4906027902353991
+Training 26 Start
+train loss: 0.8078048652064107, valid loss: 0.8474264005282978, dice score: 0.49373162678770116
+Validation loss decreased (0.852321 --> 0.847426).  Saving model ...
+Training 27 Start
+train loss: 0.8031372362243866, valid loss: 0.8456818423829637, dice score: 0.49195747413076796
+Validation loss decreased (0.847426 --> 0.845682).  Saving model ...
+Training 28 Start
+train loss: 0.8074479074420814, valid loss: 0.8504909717284881, dice score: 0.4940265503015604
+Training 29 Start
+train loss: 0.801849334416743, valid loss: 0.8483435323646477, dice score: 0.4996362959479426
+Training 30 Start
+train loss: 0.8015650440313534, valid loss: 0.8475604733905276, dice score: 0.4967202520048296
+Training 31 Start
+train loss: 0.8060764134049655, valid loss: 0.8458244897223808, dice score: 0.49728456300658147
+Training 32 Start
+train loss: 0.805971775360719, valid loss: 0.847665312053921, dice score: 0.49833537141482037
+Found model file at: /scratch/jx2314/ML/model_cifar.pt
+0
+    threshold   size      dice
+65       0.50  30000  0.609390
+71       0.55  30000  0.597987
+77       0.60  30000  0.591367
+83       0.65  30000  0.587429
+89       0.70  30000  0.586878
+1
+    threshold   size      dice
+53       0.40  30000  0.703673
+65       0.50  30000  0.700430
+89       0.70  30000  0.699566
+47       0.35  30000  0.698077
+71       0.55  30000  0.696210
+2
+     threshold   size      dice
+35        0.25  30000  0.594707
+71        0.55  30000  0.594095
+100       0.80  10000  0.593003
+65        0.50  30000  0.592897
+53        0.40  30000  0.591077
+3
+    threshold   size      dice
+88       0.70  10000  0.582513
+76       0.60  10000  0.581976
+87       0.70   5000  0.578804
+93       0.75   5000  0.576902
+82       0.65  10000  0.574468
+{0: (0.5, 30000), 1: (0.4, 30000), 2: (0.25, 30000), 3: (0.7, 10000)}
+visualize starting...
+torch.Size([16, 3, 320, 640])
+torch.Size([16, 4, 320, 640])
+(4, 320, 640)
+torch.Size([16, 3, 320, 640])
+torch.Size([16, 4, 320, 640])
+(4, 320, 640)
+torch.Size([16, 3, 320, 640])
+torch.Size([16, 4, 320, 640])
+(4, 320, 640)
+torch.Size([16, 3, 320, 640])
+torch.Size([16, 4, 320, 640])
+(4, 320, 640)
+torch.Size([16, 3, 320, 640])
+torch.Size([16, 4, 320, 640])
+(4, 320, 640)
+torch.Size([16, 3, 320, 640])
+torch.Size([16, 4, 320, 640])
+(4, 320, 640)
+torch.Size([16, 3, 320, 640])
+torch.Size([16, 4, 320, 640])
+(4, 320, 640)
+testing start...
+test loss: 0.7972118195055625, dice score: 0.26506793195626055
+['sample_submission.csv', 'train.csv', 'train_image', 'train_images_525']
+1
+True
+          Image_Label  ...        im_id
+0    0011165.jpg_Fish  ...  0011165.jpg
+1  0011165.jpg_Flower  ...  0011165.jpg
+2  0011165.jpg_Gravel  ...  0011165.jpg
+3   0011165.jpg_Sugar  ...  0011165.jpg
+4    002be4f.jpg_Fish  ...  002be4f.jpg
+
+[5 rows x 4 columns]
+None
+        img_id  count
+0  0011165.jpg      2
+1  002be4f.jpg      3
+2  0031ae9.jpg      3
+3  0035239.jpg      2
+4  003994e.jpg      3
+training set   ['32d43c0.jpg' '32e9f95.jpg' '332711f.jpg' '332cb5c.jpg' '3361513.jpg'].. with length 3993
+validation set ['32f591b.jpg' '33bf913.jpg' '33cdcc4.jpg' '3465da2.jpg' '34d2e05.jpg'].. with length 444
+testing set    ['0011165.jpg' '002be4f.jpg' '0031ae9.jpg' '0035239.jpg' '003994e.jpg'].. with length 1109
+Training 1 Start
+train loss: 1.091202567521116, valid loss: 1.244083742837648, dice score: 0.3713977844328494
+Validation loss decreased (inf --> 1.244084).  Saving model ...
+Training 2 Start
+train loss: 0.9485283349350285, valid loss: 0.9869686896736557, dice score: 0.3863593968185219
+Validation loss decreased (1.244084 --> 0.986969).  Saving model ...
+Training 3 Start
+train loss: 0.918488722336552, valid loss: 1.0133143437875283, dice score: 0.4166569613121651
+Training 4 Start
+train loss: 0.9101279807395276, valid loss: 0.8947637999379957, dice score: 0.4509749621958346
+Validation loss decreased (0.986969 --> 0.894764).  Saving model ...
+Training 5 Start
+train loss: 0.8950114689045253, valid loss: 0.9103554068384944, dice score: 0.4588987923957206
+Training 6 Start
+train loss: 0.8818397253729364, valid loss: 1.0586632329064447, dice score: 0.377810831810977
+Training 7 Start
+train loss: 0.8668194834582346, valid loss: 0.9339536412342174, dice score: 0.44289768064344254
+Training 8 Start
+train loss: 0.8354091248415539, valid loss: 0.8404138587616585, dice score: 0.48469559244207433
+Validation loss decreased (0.894764 --> 0.840414).  Saving model ...
+Training 9 Start
+train loss: 0.8266207314719839, valid loss: 0.9147514491467863, dice score: 0.46539575586447846
+Training 10 Start
+train loss: 0.825658347443653, valid loss: 0.8664387142336046, dice score: 0.46069465617875793
+Training 11 Start
+train loss: 0.8194997689492894, valid loss: 0.8162632375150114, dice score: 0.4947470635981173
+Validation loss decreased (0.840414 --> 0.816263).  Saving model ...
+Training 12 Start
+train loss: 0.815633000107657, valid loss: 0.8405069757152248, dice score: 0.47600959442757274
+Training 13 Start
+train loss: 0.8138882355256514, valid loss: 0.8880981851268459, dice score: 0.47190365517461624
+Training 14 Start
+train loss: 0.8133314015003723, valid loss: 0.8339193543872317, dice score: 0.49427890133213354
+Training 15 Start
+train loss: 0.8049281934971741, valid loss: 0.8158796929024361, dice score: 0.5052172090556171
+Validation loss decreased (0.816263 --> 0.815880).  Saving model ...
+Training 16 Start
+train loss: 0.7971988375432325, valid loss: 0.8031130416973217, dice score: 0.5126080029719585
+Validation loss decreased (0.815880 --> 0.803113).  Saving model ...
+Training 17 Start
+train loss: 0.8002620964996086, valid loss: 0.7967871169786196, dice score: 0.5128367704314154
+Validation loss decreased (0.803113 --> 0.796787).  Saving model ...
+Training 18 Start
+train loss: 0.7933040042733179, valid loss: 0.7981746647809003, dice score: 0.5138031437590316
+Training 19 Start
+train loss: 0.792619006871998, valid loss: 0.7923150288092123, dice score: 0.5156185079265285
+Validation loss decreased (0.796787 --> 0.792315).  Saving model ...
+Training 20 Start
+train loss: 0.7936991099394147, valid loss: 0.7994189616796132, dice score: 0.5167648679501301
+Training 21 Start
+train loss: 0.7951210635125772, valid loss: 0.7941426779772784, dice score: 0.5150784930667361
+Training 22 Start
+train loss: 0.7872554606105223, valid loss: 0.7942354066951854, dice score: 0.5164644412092261
+Training 23 Start
+train loss: 0.7853437180271908, valid loss: 0.7894746290670859, dice score: 0.51853226487701
+Validation loss decreased (0.792315 --> 0.789475).  Saving model ...
+Training 24 Start
+train loss: 0.7865617093423719, valid loss: 0.7899724921664676, dice score: 0.5172827340461112
+Training 25 Start
+train loss: 0.7832316966723177, valid loss: 0.7895296908713676, dice score: 0.5193192958831787
+Training 26 Start
+train loss: 0.784696907230466, valid loss: 0.7942907117508553, dice score: 0.5187469124794006
+Training 27 Start
+train loss: 0.7800736790935766, valid loss: 0.7890345679747092, dice score: 0.5217462182044983
+Validation loss decreased (0.789475 --> 0.789035).  Saving model ...
+Training 28 Start
+train loss: 0.7875695878809149, valid loss: 0.7887677212019224, dice score: 0.5170413996722247
+Validation loss decreased (0.789035 --> 0.788768).  Saving model ...
+Training 29 Start
+train loss: 0.784288834128319, valid loss: 0.7908163537850251, dice score: 0.5206532703863608
+Training 30 Start
+train loss: 0.786292200873079, valid loss: 0.789384485902013, dice score: 0.521652481040439
+Training 31 Start
+train loss: 0.7865537220512808, valid loss: 0.7925137829136204, dice score: 0.5208905741975114
+Training 32 Start
+train loss: 0.7848277081680155, valid loss: 0.7872035857793447, dice score: 0.5185183109463872
+Validation loss decreased (0.788768 --> 0.787204).  Saving model ...
+Found model file at: /scratch/jx2314/ML/model_cifar.pt
+0
+     threshold   size      dice
+71        0.55  30000  0.585279
+65        0.50  30000  0.580629
+47        0.35  30000  0.578990
+77        0.60  30000  0.577721
+100       0.80  10000  0.577176
+1
+    threshold   size      dice
+65       0.50  30000  0.747944
+77       0.60  30000  0.746536
+71       0.55  30000  0.743586
+83       0.65  30000  0.742336
+59       0.45  30000  0.742000
+2
+    threshold   size      dice
+47       0.35  30000  0.642222
+41       0.30  30000  0.631194
+53       0.40  30000  0.630185
+35       0.25  30000  0.627423
+59       0.45  30000  0.621662
+3
+    threshold   size      dice
+82       0.65  10000  0.598317
+76       0.60  10000  0.598135
+88       0.70  10000  0.597343
+70       0.55  10000  0.587162
+93       0.75   5000  0.584120
+{0: (0.55, 30000), 1: (0.5, 30000), 2: (0.35, 30000), 3: (0.65, 10000)}
+visualize starting...
+torch.Size([24, 3, 320, 640])
+torch.Size([24, 4, 320, 640])
+(4, 320, 640)
+torch.Size([24, 3, 320, 640])
+torch.Size([24, 4, 320, 640])
+(4, 320, 640)
+torch.Size([24, 3, 320, 640])
+torch.Size([24, 4, 320, 640])
+(4, 320, 640)
+torch.Size([24, 3, 320, 640])
+torch.Size([24, 4, 320, 640])
+(4, 320, 640)
+torch.Size([24, 3, 320, 640])
+torch.Size([24, 4, 320, 640])
+(4, 320, 640)
+torch.Size([24, 3, 320, 640])
+torch.Size([24, 4, 320, 640])
+(4, 320, 640)
+torch.Size([24, 3, 320, 640])
+torch.Size([24, 4, 320, 640])
+(4, 320, 640)
+testing start...
